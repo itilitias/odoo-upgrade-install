@@ -1,0 +1,158 @@
+# Odoo-oppgraderingspanel: frittstående pakke (Linux, Windows med WSL2, Mac med Docker Desktop).
+# Alt som trengs ligger i denne filen og .env: panel, database, OpenUpgrade-workere og en innebygd
+# proxy (Caddy) som ordner domener og HTTPS selv. Coolify trengs ikke.
+#
+#   docker compose up -d
+#
+# Uten domene: panelet på http://<maskinen>:8100 og instansene på egne porter (8200–8299).
+# Med domene: sett PANEL_DOMAIN (eller gjør det i panelet under Innstillinger → Domener).
+
+name: odoo-upgrade
+
+x-worker: &worker
+  restart: unless-stopped
+  depends_on:
+    db:
+      condition: service_healthy
+  environment: &worker-env
+    DB_HOST: db
+    DB_USER: odoo
+    DB_PASSWORD: ${POSTGRES_PASSWORD:?Kjør installasjonsskriptet, eller kopier .env.example til .env}
+    PANEL_DB: upgrade_panel
+    DATA_DIR: /data
+    SECRET_KEY: ${SECRET_KEY:?Kjør installasjonsskriptet, eller kopier .env.example til .env}
+    PANEL_URL: ${PANEL_URL:-}
+    GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+    RESEND_API_KEY: ${RESEND_API_KEY:-}
+    NOTIFY_EMAIL_FROM: ${NOTIFY_EMAIL_FROM:-}
+    NOTIFY_EMAIL_TO: ${NOTIFY_EMAIL_TO:-}
+    TEAMS_WEBHOOK_URL: ${TEAMS_WEBHOOK_URL:-}
+    UPDATE_INTERVAL_HOURS: ${UPDATE_INTERVAL_HOURS:-6}
+  volumes:
+    - ${OUP_DATA:-oup-data}:/data
+  stop_grace_period: 30s
+
+services:
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Kjør installasjonsskriptet, eller kopier .env.example til .env}
+      POSTGRES_DB: postgres
+    command:
+      - postgres
+      - -c
+      - shared_buffers=${PG_SHARED_BUFFERS:-512MB}
+      - -c
+      - work_mem=64MB
+      - -c
+      - maintenance_work_mem=512MB
+      - -c
+      - max_wal_size=4GB
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U odoo -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  panel:
+    image: ${OUP_REGISTRY:-ghcr.io/itilitias}/oup-panel:${OUP_VERSION:-latest}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Proxy: den innebygde Caddy. Panelet skriver Caddyfile til /caddy og ber Caddy lese den på nytt.
+      PROXY_MODE: caddy
+      CADDY_CONFIG_DIR: /caddy
+      CADDY_CONTAINER: caddy
+      PANEL_UPSTREAM: panel:8000
+      PANEL_DOMAIN: ${PANEL_DOMAIN:-}
+      ACME_EMAIL: ${ACME_EMAIL:-}
+      HOST_ADDRESS: ${HOST_ADDRESS:-}
+      INSTANCE_DOMAIN_TEMPLATE: ${INSTANCE_DOMAIN_TEMPLATE:-}
+      INSTANCE_DOMAIN_HTTPS: ${INSTANCE_DOMAIN_HTTPS:-letsencrypt}
+      INSTANCE_PORTS: ${INSTANCE_PORTS:-8200-8299}
+      INSTANCE_MEMORY: ${INSTANCE_MEMORY:-2g}
+      INSTANCE_VERSIONS: ${INSTANCE_VERSIONS:-17,18,19,20}
+      DB_HOST: db
+      DB_USER: odoo
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?Kjør installasjonsskriptet, eller kopier .env.example til .env}
+      PANEL_DB: upgrade_panel
+      # Passordet settes i oppsettveiviseren (første gang panelet åpnes) med oppsettskoden. PANEL_PASSWORD er bare for gjenoppretting.
+      PANEL_PASSWORD: ${PANEL_PASSWORD:-}
+      SETUP_CODE: ${SETUP_CODE:-}
+      SECRET_KEY: ${SECRET_KEY:?Kjør installasjonsskriptet, eller kopier .env.example til .env}
+      DATA_DIR: /data
+      PANEL_URL: ${PANEL_URL:-}
+      RETENTION_DAYS: ${RETENTION_DAYS:-30}
+      REPORT_COMPANY: ${REPORT_COMPANY:-}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      DELIVERY_REPO_OWNER: ${DELIVERY_REPO_OWNER:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      AI_MODEL: ${AI_MODEL:-claude-sonnet-5-5}
+      AI_PORT_MODEL: ${AI_PORT_MODEL:-claude-opus-5-5}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      NOTIFY_EMAIL_FROM: ${NOTIFY_EMAIL_FROM:-}
+      NOTIFY_EMAIL_TO: ${NOTIFY_EMAIL_TO:-}
+      TEAMS_WEBHOOK_URL: ${TEAMS_WEBHOOK_URL:-}
+    volumes:
+      - ${OUP_DATA:-oup-data}:/data
+      - caddy-config:/caddy
+      # Panelet starter og styrer instans-containerne
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "${PANEL_PORT:-8100}:8000"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    # Første oppstart: en tom konfigurasjon som bare svarer 404. Panelet erstatter den (og fornyer den ved hver endring).
+    entrypoint:
+      - sh
+      - -c
+      - |
+        grep -q "Generert av panelet" /etc/caddy/Caddyfile 2>/dev/null || printf ':80 {\n    respond "404 page not found" 404\n}\n' > /etc/caddy/Caddyfile
+        exec caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      - caddy-config:/etc/caddy
+      - caddy-data:/data
+
+  worker-18:
+    <<: *worker
+    image: ${OUP_REGISTRY:-ghcr.io/itilitias}/oup-worker-18:${OUP_VERSION:-latest}
+    environment:
+      <<: *worker-env
+      WORKER_VERSION: "18"
+    ports:
+      - "8018:8069"
+
+  worker-19:
+    <<: *worker
+    image: ${OUP_REGISTRY:-ghcr.io/itilitias}/oup-worker-19:${OUP_VERSION:-latest}
+    environment:
+      <<: *worker-env
+      WORKER_VERSION: "19"
+    ports:
+      - "8019:8069"
+
+  worker-20:
+    <<: *worker
+    image: ${OUP_REGISTRY:-ghcr.io/itilitias}/oup-worker-20:${OUP_VERSION:-latest}
+    environment:
+      <<: *worker-env
+      WORKER_VERSION: "20"
+    ports:
+      - "8020:8069"
+
+volumes:
+  pgdata:
+  oup-data:
+  caddy-config:
+  caddy-data:
