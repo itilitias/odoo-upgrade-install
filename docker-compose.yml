@@ -1,4 +1,4 @@
-# Odoo-oppgraderingspanel: frittstående pakke (Linux, Windows med WSL2, Mac med Docker Desktop).
+# ITILITI Upgrade Panel for Odoo: frittstående pakke (Linux, Windows med WSL2, Mac med Docker Desktop).
 # Alt som trengs ligger i denne filen og .env: panel, database, OpenUpgrade-workere og en innebygd
 # proxy (Caddy) som ordner domener og HTTPS selv. Coolify trengs ikke.
 #

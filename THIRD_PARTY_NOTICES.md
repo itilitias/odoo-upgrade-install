@@ -12,4 +12,4 @@ This product runs and bundles open-source software. It is not modified by us unl
 | Caddy | Reverse proxy and HTTPS | Apache-2.0 | https://github.com/caddyserver/caddy |
 | FastAPI, Uvicorn, Jinja2, psycopg and others | The panel itself | MIT / BSD / LGPL | see `panel/requirements.txt` |
 
-The panel does not import OpenUpgrade or the OCA tools into its own code: they are started as separate programs and only their output is read. "Odoo" is a trademark of Odoo S.A.; this product is not affiliated with or endorsed by Odoo S.A.
+The panel does not import OpenUpgrade or the OCA tools into its own code: they are started as separate programs and only their output is read. "Odoo" is a trademark of Odoo S.A.; "ITILITI Upgrade Panel for Odoo" is an independent product by ITILITI AS and is not affiliated with or endorsed by Odoo S.A.

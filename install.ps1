@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  Installerer Odoo-oppgraderingspanelet på Windows 10/11 med Docker Desktop (WSL2).
+  Installerer ITILITI Upgrade Panel for Odoo på Windows 10/11 med Docker Desktop (WSL2).
 
 .DESCRIPTION
   Kjør i PowerShell (ikke som administrator trengs bare hvis Docker Desktop skal installeres):

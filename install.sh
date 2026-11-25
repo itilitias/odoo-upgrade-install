@@ -1,5 +1,5 @@
 #!/bin/sh
-# Installerer Odoo-oppgraderingspanelet med Docker. Linux og Mac.
+# Installerer ITILITI Upgrade Panel for Odoo med Docker. Linux og Mac.
 #
 #   curl -fsSL https://raw.githubusercontent.com/itilitias/odoo-upgrade-install/main/install.sh | sudo sh
 #

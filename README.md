@@ -1,8 +1,8 @@
-# Odoo Upgrade Panel: installation
+# ITILITI Upgrade Panel for Odoo: installation
 
 **English** | [Norsk](#norsk)
 
-## Odoo Upgrade Panel: installation
+## ITILITI Upgrade Panel for Odoo: installation
 
 The panel tests and runs Odoo upgrades with OCA OpenUpgrade, without a command line. This repository contains only what you need to install it. The application itself is pulled as ready-made Docker images.
 
@@ -62,7 +62,7 @@ The agent installed in the customer's Odoo is in [odoo-upgrade-agent](https://gi
 
 # Norsk
 
-## Odoo-oppgraderingspanel: installasjon
+## ITILITI Upgrade Panel for Odoo: installasjon
 
 Panelet tester og kjører Odoo-oppgraderinger med OCA OpenUpgrade, uten kommandolinje. Dette repoet har bare det du trenger for å installere det. Selve programmet hentes som ferdige Docker-bilder.
 
