@@ -92,6 +92,9 @@ services:
       REPORT_COMPANY: ${REPORT_COMPANY:-}
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}
       DELIVERY_REPO_OWNER: ${DELIVERY_REPO_OWNER:-}
+      # Lisens: uten gyldig nøkkel er 1 kunde, 1 instans og 1 jobb gratis. Nøkkelen legges inn i panelet (System → Lisens).
+      LICENSE_ENFORCE: ${LICENSE_ENFORCE:-1}
+      LICENSE_URL: ${LICENSE_URL:-https://license.labcore.no}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       AI_MODEL: ${AI_MODEL:-claude-sonnet-5-5}
       AI_PORT_MODEL: ${AI_PORT_MODEL:-claude-opus-5-5}
