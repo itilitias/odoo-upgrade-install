@@ -17,51 +17,56 @@ $Dir     = if ($env:OUP_DIR) { $env:OUP_DIR } else { Join-Path $env:USERPROFILE 
 $Yes     = $env:OUP_YES -eq '1'
 $DryRun  = $env:OUP_DRY_RUN -eq '1'
 
+# Språk: norsk hvis Windows er satt til norsk (eller OUP_LANG=nb), ellers engelsk. Language: Norwegian or English.
+$Lang = if ($env:OUP_LANG) { $env:OUP_LANG } else { (Get-UICulture).Name }
+$Nb = $Lang -match '^(nb|nn|no)'
+function T($no, $en) { if ($Nb) { $no } else { $en } }
+
 function Say($t)  { Write-Host $t }
-function Warn($t) { Write-Host "OBS: $t" -ForegroundColor Yellow }
-function Die($t)  { Write-Host "FEIL: $t" -ForegroundColor Red; throw $t }
+function Warn($t) { Write-Host "$(T 'OBS' 'NOTE'): $t" -ForegroundColor Yellow }
+function Die($t)  { Write-Host "$(T 'FEIL' 'ERROR'): $t" -ForegroundColor Red; throw $t }
 function Confirm-Step($q) {
   if ($Yes) { return $true }
-  $a = Read-Host "$q [J/n]"
-  return -not ($a -match '^(n|nei)$')
+  $a = Read-Host "$q [$(T 'J' 'Y')/n]"
+  return -not ($a -match '^(n|no|nei)$')
 }
 
 # ---------------------------------------------------------------- system
 
-if ($PSVersionTable.PSVersion.Major -lt 5) { Die 'Trenger PowerShell 5.1 eller nyere.' }
+if ($PSVersionTable.PSVersion.Major -lt 5) { Die (T 'Trenger PowerShell 5.1 eller nyere.' 'Needs PowerShell 5.1 or newer.') }
 if (-not $IsLinux -and -not $IsMacOS) {
   $build = [Environment]::OSVersion.Version.Build
-  if ($build -lt 19041) { Die 'Trenger Windows 10 versjon 2004 (build 19041) eller nyere, eller Windows 11.' }
+  if ($build -lt 19041) { Die (T 'Trenger Windows 10 versjon 2004 (build 19041) eller nyere, eller Windows 11.' 'Needs Windows 10 version 2004 (build 19041) or newer, or Windows 11.') }
 }
-if (-not [Environment]::Is64BitOperatingSystem) { Die 'Trenger 64-bit Windows.' }
+if (-not [Environment]::Is64BitOperatingSystem) { Die (T 'Trenger 64-bit Windows.' 'Needs 64-bit Windows.') }
 
 # ---------------------------------------------------------------- Docker
 
 $dockerCmd = Get-Command docker -ErrorAction SilentlyContinue
 if (-not $dockerCmd) {
-  Say 'Docker Desktop er ikke installert.'
-  Warn 'Docker Desktop er gratis for virksomheter med under 250 ansatte OG under 10 millioner dollar i omsetning. Ellers trengs betalt lisens.'
+  Say (T 'Docker Desktop er ikke installert.' 'Docker Desktop is not installed.')
+  Warn (T 'Docker Desktop er gratis for virksomheter med under 250 ansatte OG under 10 millioner dollar i omsetning. Ellers trengs betalt lisens.' 'Docker Desktop is free for businesses with fewer than 250 employees AND less than 10 million dollars in revenue. Otherwise a paid license is required.')
   $winget = Get-Command winget -ErrorAction SilentlyContinue
-  if ($winget -and (Confirm-Step 'Installere Docker Desktop nå med winget?')) {
+  if ($winget -and (Confirm-Step (T 'Installere Docker Desktop nå med winget?' 'Install Docker Desktop now with winget?'))) {
     winget install -e --id Docker.DockerDesktop --accept-package-agreements --accept-source-agreements
     Say ''
-    Say 'Docker Desktop er installert. Start det (Start-menyen), vent til det sier at Docker kjører,'
-    Say 'start PowerShell på nytt (maskinen må kanskje startes om først) og kjør denne kommandoen en gang til.'
+    Say (T 'Docker Desktop er installert. Start det (Start-menyen), vent til det sier at Docker kjører,' 'Docker Desktop is installed. Start it (Start menu), wait until it says Docker is running,')
+    Say (T 'start PowerShell på nytt (maskinen må kanskje startes om først) og kjør denne kommandoen en gang til.' 'start PowerShell again (the machine may need a restart first) and run this command once more.')
     return
   }
-  Die 'Installer Docker Desktop fra https://www.docker.com/products/docker-desktop/ , start det, og kjør denne kommandoen på nytt.'
+  Die (T 'Installer Docker Desktop fra https://www.docker.com/products/docker-desktop/ , start det, og kjør denne kommandoen på nytt.' 'Install Docker Desktop from https://www.docker.com/products/docker-desktop/ , start it, and run this command again.')
 }
 
 & docker info *> $null
-if ($LASTEXITCODE -ne 0) { Die 'Docker svarer ikke. Start Docker Desktop, vent til det kjører, og prøv igjen.' }
+if ($LASTEXITCODE -ne 0) { Die (T 'Docker svarer ikke. Start Docker Desktop, vent til det kjører, og prøv igjen.' 'Docker is not responding. Start Docker Desktop, wait until it is running, and try again.') }
 & docker compose version *> $null
-if ($LASTEXITCODE -ne 0) { Die '«docker compose» mangler. Oppdater Docker Desktop.' }
+if ($LASTEXITCODE -ne 0) { Die (T '«docker compose» mangler. Oppdater Docker Desktop.' '"docker compose" is missing. Update Docker Desktop.') }
 
 $mem = & docker info --format '{{.MemTotal}}' 2>$null
 if ($mem -and ([double]$mem / 1GB) -lt 3) {
-  Warn ('Docker har bare ca. {0:N1} GB minne. Anbefalt er minst 4 GB. Endre under Docker Desktop > Settings > Resources, eller i .wslconfig.' -f ([double]$mem / 1GB))
+  Warn ((T 'Docker har bare ca. {0:N1} GB minne. Anbefalt er minst 4 GB. Endre under Docker Desktop > Settings > Resources, eller i .wslconfig.' 'Docker has only about {0:N1} GB of memory. At least 4 GB is recommended. Change it under Docker Desktop > Settings > Resources, or in .wslconfig.') -f ([double]$mem / 1GB))
 }
-Warn 'Windows kjører containerne i en virtuell maskin (WSL2): tregere enn Linux. Bruk Linux til daglig drift.'
+Warn (T 'Windows kjører containerne i en virtuell maskin (WSL2): tregere enn Linux. Bruk Linux til daglig drift.' 'Windows runs the containers in a virtual machine (WSL2): slower than Linux. Use Linux for daily operation.')
 
 # ---------------------------------------------------------------- porter
 
@@ -69,7 +74,7 @@ function Port-Busy([int]$p) {
   try { return [bool](Get-NetTCPConnection -State Listen -LocalPort $p -ErrorAction SilentlyContinue) } catch { return $false }
 }
 function Free-Port([int]$want, [int]$fallback) {
-  if (Port-Busy $want) { Warn "Port $want er i bruk. Bruker $fallback i stedet."; return $fallback }
+  if (Port-Busy $want) { Warn (T "Port $want er i bruk. Bruker $fallback i stedet." "Port $want is in use. Using $fallback instead."); return $fallback }
   return $want
 }
 
@@ -77,7 +82,7 @@ function Free-Port([int]$want, [int]$fallback) {
 
 New-Item -ItemType Directory -Force -Path $Dir | Out-Null
 Set-Location $Dir
-Say "Mappe: $Dir"
+Say (T "Mappe: $Dir" "Folder: $Dir")
 
 function Get-RepoFile($name) {
   $tmp = "$name.new"
@@ -96,7 +101,7 @@ function New-Secret([int]$len) {
 }
 
 if (Test-Path .env) {
-  Say 'Fant .env fra før: passordene beholdes.'
+  Say (T 'Fant .env fra før: passordene beholdes.' 'Found an existing .env: the passwords are kept.')
 } else {
   $http  = Free-Port 80 8080
   $https = Free-Port 443 8443
@@ -115,36 +120,36 @@ if (Test-Path .env) {
   if ($env:OUP_REGISTRY) { $extra += "OUP_REGISTRY=$($env:OUP_REGISTRY)" }
   # UTF-8 uten BOM og med LF: Docker Compose tåler ikke BOM i .env
   [System.IO.File]::WriteAllText((Join-Path $Dir '.env'), ((@($lines) + $extra) -join "`n") + "`n", (New-Object System.Text.UTF8Encoding($false)))
-  Say 'Laget .env med tilfeldige passord.'
+  Say (T 'Laget .env med tilfeldige passord.' 'Created .env with random passwords.')
 }
 
-if ($DryRun) { Say "Prøvekjøring: filene er laget i $Dir, men ingenting er lastet ned eller startet."; return }
+if ($DryRun) { Say (T "Prøvekjøring: filene er laget i $Dir, men ingenting er lastet ned eller startet." "Dry run: the files are created in $Dir, but nothing has been downloaded or started."); return }
 
 # ---------------------------------------------------------------- start
 
-Say 'Laster ned bildene (første gang tar det noen minutter) ...'
+Say (T 'Laster ned bildene (første gang tar det noen minutter) ...' 'Downloading the images (the first time takes a few minutes) ...')
 & docker compose pull
-if ($LASTEXITCODE -ne 0) { Die 'Kunne ikke laste ned bildene.' }
+if ($LASTEXITCODE -ne 0) { Die (T 'Kunne ikke laste ned bildene.' 'Could not download the images.') }
 & docker compose up -d
-if ($LASTEXITCODE -ne 0) { Die 'Kunne ikke starte tjenestene. Se: docker compose logs' }
+if ($LASTEXITCODE -ne 0) { Die (T 'Kunne ikke starte tjenestene. Se: docker compose logs' 'Could not start the services. See: docker compose logs') }
 
 function Env-Value($key, $default) {
   $m = Select-String -Path .env -Pattern "^$key=(.*)$" | Select-Object -Last 1
   if ($m) { return $m.Matches[0].Groups[1].Value } else { return $default }
 }
 $port = Env-Value 'PANEL_PORT' '8100'
-Say 'Venter på at panelet starter ...'
+Say (T 'Venter på at panelet starter ...' 'Waiting for the panel to start ...')
 $ok = $false
 for ($i = 0; $i -lt 60 -and -not $ok; $i++) {
   try { $r = Invoke-WebRequest -UseBasicParsing -Uri "http://127.0.0.1:$port/healthz" -TimeoutSec 3; $ok = ($r.StatusCode -eq 200) }
   catch { Start-Sleep -Seconds 2 }
 }
-if (-not $ok) { Die "Panelet svarer ikke etter 2 minutter. Se: cd $Dir ; docker compose logs panel" }
+if (-not $ok) { Die (T "Panelet svarer ikke etter 2 minutter. Se: cd $Dir ; docker compose logs panel" "The panel does not respond after 2 minutes. See: cd $Dir ; docker compose logs panel") }
 
 $code = Env-Value 'SETUP_CODE' ''
 Say ''
-Say 'Ferdig. Åpne panelet og gjør oppsettet:'
+Say (T 'Ferdig. Åpne panelet og gjør oppsettet:' 'Done. Open the panel and complete the setup:')
 Say "    http://localhost:$port"
 Say ''
-Say "Oppsettskode (trengs første gang): $code"
-Say "Koden står også i $Dir\.env. Oppdatere senere: cd $Dir ; docker compose pull ; docker compose up -d"
+Say (T "Oppsettskode (trengs første gang): $code" "Setup code (needed the first time): $code")
+Say (T "Koden står også i $Dir\.env. Oppdatere senere: cd $Dir ; docker compose pull ; docker compose up -d" "The code is also in $Dir\.env. To update later: cd $Dir ; docker compose pull ; docker compose up -d")
