@@ -140,6 +140,26 @@ if [ "${OUP_DRY_RUN:-0}" = "1" ]; then
   exit 0
 fi
 
+# ---------------------------------------------------------------- bilderegister
+
+REG="${OUP_REGISTRY:-$(sed -n 's/^OUP_REGISTRY=//p' .env | tail -1)}"; REG="${REG:-license.labcore.no}"
+REG_HOST="${REG%%/*}"
+case "$REG_HOST" in
+  license.labcore.no|license.*)  # vårt eget register: krever lisensnøkkel (gratisnøkkel finnes)
+    if ! grep -qs "\"$REG_HOST\"" "$HOME/.docker/config.json"; then
+      KEY="${OUP_LICENSE_KEY:-}"
+      if [ -z "$KEY" ] && [ "${OUP_YES:-0}" != "1" ] && [ -r /dev/tty ]; then
+        say "$(T "Bildene hentes fra et privat register og krever en nøkkel. Har du ikke en, få en gratis her: https://$REG_HOST/gratis" "The images come from a private registry and need a key. If you do not have one, get a free key here: https://$REG_HOST/gratis")"
+        printf '%s ' "$(T "Lisensnøkkel (OUP-...):" "License key (OUP-...):")" > /dev/tty
+        read -r KEY < /dev/tty || KEY=""
+      fi
+      [ -n "$KEY" ] || die "$(T "Lisensnøkkel mangler. Sett OUP_LICENSE_KEY=OUP-... og kjør på nytt. Gratisnøkkel: https://$REG_HOST/gratis" "License key is missing. Set OUP_LICENSE_KEY=OUP-... and run again. Free key: https://$REG_HOST/gratis")"
+      printf '%s' "$KEY" | docker login "$REG_HOST" -u lisens --password-stdin >/dev/null 2>&1 \
+        || die "$(T "Innloggingen i registeret feilet. Sjekk nøkkelen (og at lisensen ikke er utløpt)." "Login to the registry failed. Check the key (and that the license has not expired).")"
+      say "$(T "Innlogget i registeret." "Logged in to the registry.")"
+    fi ;;
+esac
+
 # ---------------------------------------------------------------- start
 
 say "$(T "Laster ned bildene (første gang tar det noen minutter) ..." "Downloading the images (the first time takes a few minutes) ...")"

@@ -125,6 +125,26 @@ if (Test-Path .env) {
 
 if ($DryRun) { Say (T "Prøvekjøring: filene er laget i $Dir, men ingenting er lastet ned eller startet." "Dry run: the files are created in $Dir, but nothing has been downloaded or started."); return }
 
+# ---------------------------------------------------------------- bilderegister
+
+$Reg = if ($env:OUP_REGISTRY) { $env:OUP_REGISTRY } else { 'license.labcore.no' }
+$RegHost = ($Reg -split '/')[0]
+if ($RegHost -like 'license.*') {
+  $cfg = Join-Path $env:USERPROFILE '.docker\config.json'
+  $loggedIn = (Test-Path $cfg) -and ((Get-Content $cfg -Raw) -match [regex]::Escape("`"$RegHost`""))
+  if (-not $loggedIn) {
+    $Key = $env:OUP_LICENSE_KEY
+    if (-not $Key -and -not $Yes) {
+      Say (T "Bildene hentes fra et privat register og krever en nøkkel. Har du ikke en, få en gratis her: https://$RegHost/gratis" "The images come from a private registry and need a key. If you do not have one, get a free key here: https://$RegHost/gratis")
+      $Key = Read-Host (T 'Lisensnøkkel (OUP-...)' 'License key (OUP-...)')
+    }
+    if (-not $Key) { Die (T "Lisensnøkkel mangler. Sett `$env:OUP_LICENSE_KEY og kjør på nytt. Gratisnøkkel: https://$RegHost/gratis" "License key is missing. Set `$env:OUP_LICENSE_KEY and run again. Free key: https://$RegHost/gratis") }
+    $Key | & docker login $RegHost -u lisens --password-stdin *> $null
+    if ($LASTEXITCODE -ne 0) { Die (T 'Innloggingen i registeret feilet. Sjekk nøkkelen (og at lisensen ikke er utløpt).' 'Login to the registry failed. Check the key (and that the license has not expired).') }
+    Say (T 'Innlogget i registeret.' 'Logged in to the registry.')
+  }
+}
+
 # ---------------------------------------------------------------- start
 
 Say (T 'Laster ned bildene (første gang tar det noen minutter) ...' 'Downloading the images (the first time takes a few minutes) ...')

@@ -59,7 +59,7 @@ services:
       retries: 10
 
   panel:
-    image: ${OUP_REGISTRY:-ghcr.io/itilitias}/oup-panel:${OUP_VERSION:-latest}
+    image: ${OUP_REGISTRY:-license.labcore.no}/oup-panel:${OUP_VERSION:-latest}
     restart: unless-stopped
     depends_on:
       db:
@@ -129,7 +129,7 @@ services:
 
   worker-18:
     <<: *worker
-    image: ${OUP_REGISTRY:-ghcr.io/itilitias}/oup-worker-18:${OUP_VERSION:-latest}
+    image: ${OUP_REGISTRY:-license.labcore.no}/oup-worker-18:${OUP_VERSION:-latest}
     environment:
       <<: *worker-env
       WORKER_VERSION: "18"
@@ -138,7 +138,7 @@ services:
 
   worker-19:
     <<: *worker
-    image: ${OUP_REGISTRY:-ghcr.io/itilitias}/oup-worker-19:${OUP_VERSION:-latest}
+    image: ${OUP_REGISTRY:-license.labcore.no}/oup-worker-19:${OUP_VERSION:-latest}
     environment:
       <<: *worker-env
       WORKER_VERSION: "19"
@@ -147,7 +147,7 @@ services:
 
   worker-20:
     <<: *worker
-    image: ${OUP_REGISTRY:-ghcr.io/itilitias}/oup-worker-20:${OUP_VERSION:-latest}
+    image: ${OUP_REGISTRY:-license.labcore.no}/oup-worker-20:${OUP_VERSION:-latest}
     environment:
       <<: *worker-env
       WORKER_VERSION: "20"

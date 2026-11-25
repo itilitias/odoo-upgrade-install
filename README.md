@@ -26,6 +26,8 @@ irm https://raw.githubusercontent.com/itilitias/odoo-upgrade-install/main/instal
 curl -fsSL https://raw.githubusercontent.com/itilitias/odoo-upgrade-install/main/install.sh | sh
 ```
 
+The images come from a private registry. The script asks for a **license key** (`OUP-...`) and logs in with it. You can get a free key (1 customer, 1 instance, 1 job) at https://license.labcore.no/gratis. For unattended installs, set `OUP_LICENSE_KEY=OUP-...`.
+
 The script creates a folder (`/opt/odoo-upgrade` on Linux, `odoo-upgrade` in your home folder otherwise), generates random passwords in `.env`, downloads the images and starts everything. At the end it prints the address of the panel and a **setup code**. Open the address, enter the code and follow the setup wizard.
 
 Run the same command again to update the installation files. `.env` and the passwords are kept.
