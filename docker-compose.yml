@@ -93,6 +93,8 @@ services:
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}
       DELIVERY_REPO_OWNER: ${DELIVERY_REPO_OWNER:-}
       # Lisens: uten gyldig nøkkel er 1 kunde, 1 instans og 1 jobb gratis. Nøkkelen legges inn i panelet (System → Lisens).
+      # Oppdatering med ett trykk fra System-siden (bruker Docker-socketen og denne mappen)
+      SELF_UPDATE: ${SELF_UPDATE:-1}
       LICENSE_ENFORCE: ${LICENSE_ENFORCE:-1}
       LICENSE_URL: ${LICENSE_URL:-https://license.labcore.no}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
