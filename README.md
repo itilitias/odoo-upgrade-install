@@ -56,7 +56,7 @@ Data lives in the Docker volumes `pgdata` and `oup-data`. Back up both. Set `OUP
 * `docker-compose.yml`: the whole setup (panel, PostgreSQL, OpenUpgrade workers and Caddy for HTTPS).
 * `.env.example`: all options. The installer creates `.env` from it.
 
-The agent installed in the customer's Odoo is in [odoo-upgrade-agent](https://github.com/itilitias/odoo-upgrade-agent).
+The agent installed in the customer's Odoo is in [odoo-upgrade-agent](https://github.com/itilitias/odoo-upgrade-agent). Open-source components and their licenses: see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ---
 
@@ -114,4 +114,4 @@ Dataene ligger i Docker-volumene `pgdata` og `oup-data`. Ta backup av begge. Set
 * `docker-compose.yml`: hele oppsettet (panel, PostgreSQL, OpenUpgrade-workere og Caddy som ordner HTTPS).
 * `.env.example`: alle valg. Installasjonen lager `.env` av den.
 
-Agenten som installeres i kundens Odoo ligger i [odoo-upgrade-agent](https://github.com/itilitias/odoo-upgrade-agent).
+Agenten som installeres i kundens Odoo ligger i [odoo-upgrade-agent](https://github.com/itilitias/odoo-upgrade-agent). Åpen kildekode-komponenter og lisensene deres: se [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
