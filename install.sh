@@ -142,10 +142,10 @@ fi
 
 # ---------------------------------------------------------------- bilderegister
 
-REG="${OUP_REGISTRY:-$(sed -n 's/^OUP_REGISTRY=//p' .env | tail -1)}"; REG="${REG:-license.labcore.no}"
+REG="${OUP_REGISTRY:-$(sed -n 's/^OUP_REGISTRY=//p' .env | tail -1)}"; REG="${REG:-license.itilitilabs.com}"
 REG_HOST="${REG%%/*}"
 case "$REG_HOST" in
-  license.labcore.no|license.*)  # vårt eget register: krever lisensnøkkel (gratisnøkkel finnes)
+  license.itilitilabs.com|license.labcore.no|license.*)  # vårt eget register: krever lisensnøkkel (gratisnøkkel finnes)
     if ! grep -qs "\"$REG_HOST\"" "$HOME/.docker/config.json"; then
       KEY="${OUP_LICENSE_KEY:-}"
       if [ -z "$KEY" ] && [ "${OUP_YES:-0}" != "1" ] && [ -r /dev/tty ]; then

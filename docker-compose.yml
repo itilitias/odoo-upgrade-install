@@ -59,7 +59,7 @@ services:
       retries: 10
 
   panel:
-    image: ${OUP_REGISTRY:-license.labcore.no}/oup-panel:${OUP_VERSION:-latest}
+    image: ${OUP_REGISTRY:-license.itilitilabs.com}/oup-panel:${OUP_VERSION:-latest}
     restart: unless-stopped
     depends_on:
       db:
@@ -96,7 +96,7 @@ services:
       # Oppdatering med ett trykk fra System-siden (bruker Docker-socketen og denne mappen)
       SELF_UPDATE: ${SELF_UPDATE:-1}
       LICENSE_ENFORCE: ${LICENSE_ENFORCE:-1}
-      LICENSE_URL: ${LICENSE_URL:-https://license.labcore.no}
+      LICENSE_URL: ${LICENSE_URL:-https://license.itilitilabs.com}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       AI_MODEL: ${AI_MODEL:-claude-sonnet-5-5}
       AI_PORT_MODEL: ${AI_PORT_MODEL:-claude-opus-5-5}
@@ -131,7 +131,7 @@ services:
 
   worker-18:
     <<: *worker
-    image: ${OUP_REGISTRY:-license.labcore.no}/oup-worker-18:${OUP_VERSION:-latest}
+    image: ${OUP_REGISTRY:-license.itilitilabs.com}/oup-worker-18:${OUP_VERSION:-latest}
     environment:
       <<: *worker-env
       WORKER_VERSION: "18"
@@ -140,7 +140,7 @@ services:
 
   worker-19:
     <<: *worker
-    image: ${OUP_REGISTRY:-license.labcore.no}/oup-worker-19:${OUP_VERSION:-latest}
+    image: ${OUP_REGISTRY:-license.itilitilabs.com}/oup-worker-19:${OUP_VERSION:-latest}
     environment:
       <<: *worker-env
       WORKER_VERSION: "19"
@@ -149,7 +149,7 @@ services:
 
   worker-20:
     <<: *worker
-    image: ${OUP_REGISTRY:-license.labcore.no}/oup-worker-20:${OUP_VERSION:-latest}
+    image: ${OUP_REGISTRY:-license.itilitilabs.com}/oup-worker-20:${OUP_VERSION:-latest}
     environment:
       <<: *worker-env
       WORKER_VERSION: "20"

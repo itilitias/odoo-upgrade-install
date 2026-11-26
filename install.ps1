@@ -127,7 +127,7 @@ if ($DryRun) { Say (T "Prøvekjøring: filene er laget i $Dir, men ingenting er 
 
 # ---------------------------------------------------------------- bilderegister
 
-$Reg = if ($env:OUP_REGISTRY) { $env:OUP_REGISTRY } else { 'license.labcore.no' }
+$Reg = if ($env:OUP_REGISTRY) { $env:OUP_REGISTRY } else { 'license.itilitilabs.com' }
 $RegHost = ($Reg -split '/')[0]
 if ($RegHost -like 'license.*') {
   $cfg = Join-Path $env:USERPROFILE '.docker\config.json'
