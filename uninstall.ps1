@@ -91,6 +91,49 @@ if ($Purge) {
   }
 }
 
+# ---------------------------------------------------------------- valgfritt: Docker Desktop og WSL
+# Dette kan brukes av andre programmer på maskinen, så det spørres alltid, svaret er nei som standard,
+# og det gjøres aldri med OUP_YES=1.
+function Get-WslDistros {
+  try {
+    $oldEnc = [Console]::OutputEncoding
+    [Console]::OutputEncoding = [System.Text.Encoding]::Unicode
+    $l = & wsl.exe -l -q 2>$null
+    [Console]::OutputEncoding = $oldEnc
+    return @($l | ForEach-Object { ("$_" -replace "`0", '').Trim() } | Where-Object { $_ -and $_ -notmatch '^docker-desktop' })
+  } catch { return @() }
+}
+function Ask-No($q) {
+  if ($Yes -or -not [Environment]::UserInteractive) { return $false }
+  $a = Read-Host "$q [$(T 'j' 'y')/N]"
+  return ($a -match '^(j|y|ja|yes)$')
+}
+
+$dockerRemoved = $false
+if (Get-Command docker -ErrorAction SilentlyContinue) {
+  Say ''
+  Say (T 'Docker Desktop er fortsatt installert. Det fjernes ikke av avinstalleringen over, og brukes kanskje av andre programmer.' 'Docker Desktop is still installed. The uninstall above did not remove it, and other programs may use it.')
+  if (Ask-No (T 'Fjerne Docker Desktop også? Da slutter Docker å virke for ALLE programmer på maskinen.' 'Remove Docker Desktop too? Then Docker stops working for ALL programs on this machine.')) {
+    if (Get-Command winget -ErrorAction SilentlyContinue) {
+      & winget uninstall -e --id Docker.DockerDesktop | Out-Host
+      $dockerRemoved = $true
+    } else {
+      Say (T 'Fant ikke winget. Fjern Docker Desktop selv under Innstillinger → Apper.' 'Could not find winget. Remove Docker Desktop yourself under Settings → Apps.')
+    }
+  }
+}
+if (Get-Command wsl.exe -ErrorAction SilentlyContinue) {
+  $others = Get-WslDistros
+  if ($others.Count -gt 0) {
+    Say ''
+    Say ((T 'WSL har andre Linux-installasjoner som ikke hører til panelet: ' 'WSL has other Linux installations that do not belong to the panel: ') + ($others -join ', '))
+    Say (T 'Derfor lar vi WSL stå.' 'So we leave WSL in place.')
+  } elseif (Ask-No (T 'Fjerne WSL også? Det slutter å virke for alle programmer som bruker det. Funksjonene i Windows (Virtual Machine Platform) står igjen, og er uskadelige.' 'Remove WSL too? It stops working for all programs that use it. The Windows features (Virtual Machine Platform) remain, and are harmless.')) {
+    & wsl.exe --uninstall | Out-Host
+    Say (T 'WSL er fjernet. Start gjerne maskinen på nytt.' 'WSL is removed. Restart the machine if you like.')
+  }
+}
+
 Say ''
 Say (T 'Ferdig.' 'Done.')
 if (-not $Purge) { Say (T "Dataene er beholdt. Installerer du på nytt i $Dir, tas de i bruk igjen." "The data is kept. If you reinstall in $Dir, it is picked up again.") }
@@ -98,4 +141,3 @@ Say (T 'Dette gjør du selv, om du brukte det:' 'Do these yourself, if you used 
 Say ("  - " + (T 'Fjern tunnelen og vertsnavnet i Cloudflare Zero Trust (Networks → Tunnels).' 'Remove the tunnel and hostname in Cloudflare Zero Trust (Networks → Tunnels).'))
 Say ("  - " + (T 'Fjern DNS-postene for domenet ditt.' 'Remove the DNS records for your domain.'))
 Say ("  - " + (T 'Si opp lisensen hvis den er betalt.' 'Cancel the license if it is paid.'))
-Say ("  - " + (T 'Docker Desktop selv er ikke fjernet.' 'Docker Desktop itself is not removed.'))
