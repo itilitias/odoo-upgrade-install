@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   Fjerner ITILITI Upgrade Panel for Odoo på Windows. / Removes the panel on Windows.
 
@@ -118,7 +118,7 @@ if (Get-Command docker -ErrorAction SilentlyContinue) {
       & winget uninstall -e --id Docker.DockerDesktop | Out-Host
       $dockerRemoved = $true
     } else {
-      Say (T 'Fant ikke winget. Fjern Docker Desktop selv under Innstillinger → Apper.' 'Could not find winget. Remove Docker Desktop yourself under Settings → Apps.')
+      Say (T 'Fant ikke winget. Fjern Docker Desktop selv under Innstillinger -> Apper.' 'Could not find winget. Remove Docker Desktop yourself under Settings -> Apps.')
     }
   }
 }
@@ -138,6 +138,6 @@ Say ''
 Say (T 'Ferdig.' 'Done.')
 if (-not $Purge) { Say (T "Dataene er beholdt. Installerer du på nytt i $Dir, tas de i bruk igjen." "The data is kept. If you reinstall in $Dir, it is picked up again.") }
 Say (T 'Dette gjør du selv, om du brukte det:' 'Do these yourself, if you used them:')
-Say ("  - " + (T 'Fjern tunnelen og vertsnavnet i Cloudflare Zero Trust (Networks → Tunnels).' 'Remove the tunnel and hostname in Cloudflare Zero Trust (Networks → Tunnels).'))
+Say ("  - " + (T 'Fjern tunnelen og vertsnavnet i Cloudflare Zero Trust (Networks -> Tunnels).' 'Remove the tunnel and hostname in Cloudflare Zero Trust (Networks -> Tunnels).'))
 Say ("  - " + (T 'Fjern DNS-postene for domenet ditt.' 'Remove the DNS records for your domain.'))
 Say ("  - " + (T 'Si opp lisensen hvis den er betalt.' 'Cancel the license if it is paid.'))
