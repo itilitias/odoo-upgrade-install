@@ -79,7 +79,12 @@ if ($haveCompose) {
 } elseif ($projConts) {
   & docker rm -f @projConts *> $null
 }
-if ($images) { & docker rmi -f @images *> $null }
+# Hjelpecontaineren fra oppdatering i panelet (kortlevd, men blir liggende)
+& docker rm -f oup-updater *> $null
+if ($images) {
+  $rmi = & docker rmi -f @images 2>&1
+  if ($LASTEXITCODE -ne 0) { Say (T '  Kunne ikke fjerne Odoo-bildet:' '  Could not remove the Odoo image:'); $rmi | ForEach-Object { "    $_" } }
+}
 if ($Purge) {
   Say (T 'Sletter data ...' 'Deleting data ...')
   if ($instVols) { & docker volume rm -f @instVols *> $null }
