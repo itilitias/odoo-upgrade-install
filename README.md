@@ -26,7 +26,7 @@ irm https://raw.githubusercontent.com/itilitias/odoo-upgrade-install/main/instal
 curl -fsSL https://raw.githubusercontent.com/itilitias/odoo-upgrade-install/main/install.sh | sh
 ```
 
-The images come from a private registry. The script asks for a **license key** (`OUP-...`) and logs in with it. You can get a free key (1 customer, 1 instance, 1 job) at https://license.itilitilabs.com/gratis. For unattended installs, set `OUP_LICENSE_KEY=OUP-...`.
+The images come from a private registry. The script asks for a **license key** (`OUP-...`) and logs in with it. You can get a free key (1 customer, 1 instance, 1 job) at https://itilitilabs.com: press **Get started** and enter your e-mail. For unattended installs, set `OUP_LICENSE_KEY=OUP-...`.
 
 The script creates a folder (`/opt/odoo-upgrade` on Linux, `odoo-upgrade` in your home folder otherwise), generates random passwords in `.env`, downloads the images and starts everything. At the end it prints the address of the panel and a **setup code**. Open the address, enter the code and follow the setup wizard.
 
@@ -115,6 +115,8 @@ irm https://raw.githubusercontent.com/itilitias/odoo-upgrade-install/main/instal
 ```bash
 curl -fsSL https://raw.githubusercontent.com/itilitias/odoo-upgrade-install/main/install.sh | sh
 ```
+
+Bildene hentes fra et privat register. Skriptet spør om en **lisensnøkkel** (`OUP-...`) og logger inn med den. Du får en gratis nøkkel (1 kunde, 1 instans, 1 jobb) på https://itilitilabs.com: trykk **Kom i gang** og skriv inn e-posten din. Til uovervåkede installasjoner setter du `OUP_LICENSE_KEY=OUP-...`.
 
 Skriptet lager en mappe (`/opt/odoo-upgrade` på Linux, `odoo-upgrade` i hjemmemappen ellers), genererer tilfeldige passord i `.env`, laster ned bildene og starter alt. Til slutt skriver det ut adressen til panelet og en **oppsettskode**. Åpne adressen, skriv inn koden, og følg oppsettveiviseren.
 
