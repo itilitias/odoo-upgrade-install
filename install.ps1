@@ -129,6 +129,7 @@ function Get-RepoFile($name) {
   Move-Item -Force $tmp $name
 }
 Get-RepoFile 'docker-compose.yml'
+Get-RepoFile 'uninstall.ps1'  # ligger i mappen, så den kan kjøres derfra
 if (-not (Test-Path .env.example)) { Get-RepoFile '.env.example' }
 
 function New-Secret([int]$len) {

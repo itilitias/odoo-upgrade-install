@@ -72,6 +72,8 @@ Data lives in the Docker volumes `pgdata` and `oup-data`. Back up both. Set `OUP
 
 By default the uninstall script stops and removes the containers and images but **keeps all your data** (databases, backups, certificates). Add `--purge` to delete everything, including the folder with `.env`. Purge cannot be undone and asks you to type `SLETT` to confirm. Take a backup first.
 
+The installer puts the uninstall script in the install folder, so run it from there.
+
 * Linux and Mac: `sudo sh uninstall.sh` (or `sudo sh uninstall.sh --purge`)
 * Windows (PowerShell): `.\uninstall.ps1` (or `.\uninstall.ps1 -Purge`)
 
@@ -153,6 +155,8 @@ Dataene ligger i Docker-volumene `pgdata` og `oup-data`. Ta backup av begge. Set
 ### Avinstaller
 
 Som standard stopper og fjerner avinstalleringsskriptet containerne og bildene, men **beholder alle dataene dine** (databaser, backuper, sertifikater). Legg til `--purge` for å slette alt, også mappen med `.env`. Purge kan ikke angres og ber deg skrive `SLETT` for å bekrefte. Ta backup først.
+
+Installasjonen legger avinstalleringsskriptet i installasjonsmappen, så kjør det derfra.
 
 * Linux og Mac: `sudo sh uninstall.sh` (eller `sudo sh uninstall.sh --purge`)
 * Windows (PowerShell): `.\uninstall.ps1` (eller `.\uninstall.ps1 -Purge`)
