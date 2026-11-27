@@ -110,6 +110,7 @@ fetch() {  # fetch <navn>
 }
 
 fetch docker-compose.yml
+fetch uninstall.sh  # ligger i mappen, så den kan kjøres derfra
 [ -f .env.example ] || fetch .env.example
 
 rand() { head -c 48 /dev/urandom | od -An -tx1 | tr -d ' \n' | cut -c1-"$1"; }
