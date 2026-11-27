@@ -129,6 +129,18 @@ services:
       - caddy-config:/etc/caddy
       - caddy-data:/data
 
+  # Valgfri: Cloudflare Tunnel, så du slipper å åpne port 80 og 443. Slå på med COMPOSE_PROFILES=tunnel og
+  # CLOUDFLARE_TUNNEL_TOKEN i .env. I Cloudflare peker du vertsnavnet (*.firma.no) til http://caddy:80.
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    profiles: ["tunnel"]
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
+    depends_on:
+      - caddy
+
   worker-18:
     <<: *worker
     image: ${OUP_REGISTRY:-license.itilitilabs.com}/oup-worker-18:${OUP_VERSION:-latest}

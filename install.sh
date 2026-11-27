@@ -121,6 +121,13 @@ else
   HTTP_PORT="$(free_port 80 8080)"
   HTTPS_PORT="$(free_port 443 8443)"
   PANEL_PORT="$(free_port 8100 8101)"
+  # Valgfritt: Cloudflare Tunnel i stedet for åpne porter. Tokenet kan også gis som OUP_TUNNEL_TOKEN.
+  TUNNEL_TOKEN="${OUP_TUNNEL_TOKEN:-}"
+  if [ -z "$TUNNEL_TOKEN" ] && [ "${OUP_YES:-0}" != "1" ] && [ -r /dev/tty ]; then
+    say "$(T "Valgfritt: Cloudflare Tunnel (anbefalt) gir adresser og HTTPS uten at du åpner porter. Lag en tunnel i Cloudflare Zero Trust og lim inn tokenet her. Trykk Enter for å hoppe over." "Optional: Cloudflare Tunnel (recommended) gives you addresses and HTTPS without opening ports. Create a tunnel in Cloudflare Zero Trust and paste the token here. Press Enter to skip.")"
+    printf '%s ' "$(T "Tunnel-token:" "Tunnel token:")" > /dev/tty
+    read -r TUNNEL_TOKEN < /dev/tty || TUNNEL_TOKEN=""
+  fi
   {
     sed -e "s|^POSTGRES_PASSWORD=.*|POSTGRES_PASSWORD=$(rand 40)|" \
         -e "s|^SECRET_KEY=.*|SECRET_KEY=$(rand 64)|" \
@@ -130,6 +137,11 @@ else
     [ "$PANEL_PORT" = 8100 ] || echo "PANEL_PORT=$PANEL_PORT"
     [ -z "${OUP_VERSION:-}" ] || echo "OUP_VERSION=$OUP_VERSION"
     [ -z "${OUP_REGISTRY:-}" ] || echo "OUP_REGISTRY=$OUP_REGISTRY"
+    if [ -n "$TUNNEL_TOKEN" ]; then
+      echo "COMPOSE_PROFILES=tunnel"
+      echo "CLOUDFLARE_TUNNEL_TOKEN=$TUNNEL_TOKEN"
+      echo "INSTANCE_DOMAIN_HTTPS=cloudflare"
+    fi
   } > .env
   chmod 600 .env
   say "$(T "Laget .env med tilfeldige passord." "Created .env with random passwords.")"
@@ -182,5 +194,8 @@ say ""
 say "$(T "Ferdig. Åpne panelet og gjør oppsettet:" "Done. Open the panel and complete the setup:")"
 say "    http://$HOST:$PANEL_PORT"
 say ""
+if grep -qs '^CLOUDFLARE_TUNNEL_TOKEN=.' .env; then
+  say "$(T "Cloudflare Tunnel er slått på. I Cloudflare legger du til et vertsnavn (for eksempel *.firma.no) med tjeneste http://caddy:80." "Cloudflare Tunnel is on. In Cloudflare, add a hostname (for example *.company.com) with service http://caddy:80.")"
+fi
 say "$(T "Oppsettskode (trengs første gang): $CODE" "Setup code (needed the first time): $CODE")"
 say "$(T "Koden står også i $DIR/.env. Oppdatere senere: cd $DIR && docker compose pull && docker compose up -d" "The code is also in $DIR/.env. To update later: cd $DIR && docker compose pull && docker compose up -d")"

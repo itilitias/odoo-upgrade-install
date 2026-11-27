@@ -112,7 +112,13 @@ if (Test-Path .env) {
     elseif ($l -like 'SETUP_CODE=*')        { 'SETUP_CODE=' + (New-Secret 16) }
     else { $l }
   }
+  $tunnel = $env:OUP_TUNNEL_TOKEN
+  if (-not $tunnel -and -not $Yes) {
+    Say (T 'Valgfritt: Cloudflare Tunnel (anbefalt) gir adresser og HTTPS uten at du åpner porter. Lag en tunnel i Cloudflare Zero Trust og lim inn tokenet her. Trykk Enter for å hoppe over.' 'Optional: Cloudflare Tunnel (recommended) gives you addresses and HTTPS without opening ports. Create a tunnel in Cloudflare Zero Trust and paste the token here. Press Enter to skip.')
+    $tunnel = Read-Host (T 'Tunnel-token' 'Tunnel token')
+  }
   $extra = @()
+  if ($tunnel) { $extra += 'COMPOSE_PROFILES=tunnel'; $extra += "CLOUDFLARE_TUNNEL_TOKEN=$tunnel"; $extra += 'INSTANCE_DOMAIN_HTTPS=cloudflare' }
   if ($http  -ne 80)   { $extra += "HTTP_PORT=$http" }
   if ($https -ne 443)  { $extra += "HTTPS_PORT=$https" }
   if ($panel -ne 8100) { $extra += "PANEL_PORT=$panel" }
@@ -171,5 +177,8 @@ Say ''
 Say (T 'Ferdig. Åpne panelet og gjør oppsettet:' 'Done. Open the panel and complete the setup:')
 Say "    http://localhost:$port"
 Say ''
+if (Select-String -Path .env -Pattern '^CLOUDFLARE_TUNNEL_TOKEN=.' -Quiet) {
+  Say (T 'Cloudflare Tunnel er slått på. I Cloudflare legger du til et vertsnavn (for eksempel *.firma.no) med tjeneste http://caddy:80.' 'Cloudflare Tunnel is on. In Cloudflare, add a hostname (for example *.company.com) with service http://caddy:80.')
+}
 Say (T "Oppsettskode (trengs første gang): $code" "Setup code (needed the first time): $code")
 Say (T "Koden står også i $Dir\.env. Oppdatere senere: cd $Dir ; docker compose pull ; docker compose up -d" "The code is also in $Dir\.env. To update later: cd $Dir ; docker compose pull ; docker compose up -d")
