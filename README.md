@@ -75,7 +75,7 @@ By default the uninstall script stops and removes the containers and images but 
 * Linux and Mac: `sudo sh uninstall.sh` (or `sudo sh uninstall.sh --purge`)
 * Windows (PowerShell): `.\uninstall.ps1` (or `.\uninstall.ps1 -Purge`)
 
-It only touches what belongs to the panel: the `odoo-upgrade` compose project and the instances the panel created. Other containers are left alone. Afterwards, remove the tunnel and DNS records in Cloudflare yourself if you used them, and cancel the license if it is paid. Docker itself is not removed.
+It only touches what belongs to the panel: the `odoo-upgrade` compose project and the instances the panel created. Other containers are left alone. Afterwards, remove the tunnel and DNS records in Cloudflare yourself if you used them, and cancel the license if it is paid. Docker itself is not removed by default. On Windows the script then asks, separately and with "no" as the default, whether to remove Docker Desktop and WSL too. It leaves WSL alone if other Linux installations use it.
 
 ### Other files
 
@@ -157,7 +157,7 @@ Som standard stopper og fjerner avinstalleringsskriptet containerne og bildene, 
 * Linux og Mac: `sudo sh uninstall.sh` (eller `sudo sh uninstall.sh --purge`)
 * Windows (PowerShell): `.\uninstall.ps1` (eller `.\uninstall.ps1 -Purge`)
 
-Det rører bare det som hører til panelet: compose-prosjektet `odoo-upgrade` og instansene panelet har laget. Andre containere blir stående. Etterpå fjerner du selv tunnelen og DNS-postene i Cloudflare hvis du brukte dem, og sier opp lisensen hvis den er betalt. Docker selv fjernes ikke.
+Det rører bare det som hører til panelet: compose-prosjektet `odoo-upgrade` og instansene panelet har laget. Andre containere blir stående. Etterpå fjerner du selv tunnelen og DNS-postene i Cloudflare hvis du brukte dem, og sier opp lisensen hvis den er betalt. Docker selv fjernes ikke som standard. På Windows spør skriptet til slutt, hver for seg og med «nei» som standard, om Docker Desktop og WSL også skal fjernes. Det lar WSL stå hvis andre Linux-installasjoner bruker det.
 
 ### Andre filer
 
