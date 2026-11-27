@@ -38,9 +38,18 @@ Run the same command again to update the installation files. `.env` and the pass
 
 * 4 GB RAM or more (more with more instances), 20 GB disk or more.
 * 64-bit x86 or ARM.
-* Ports 80 and 443 open if you use your own domain (for HTTPS). If they are taken, the script picks other ports and tells you.
+* Ports 80 and 443 open if you use your own domain (for HTTPS). If they are taken, the script picks other ports and tells you. Or use Cloudflare Tunnel (below) and keep every port closed.
 * **Windows and Mac** run the containers in a virtual machine, which is slower and uses more memory. Use Linux for production.
 * **Docker Desktop** is free for companies with fewer than 250 employees and less than USD 10 million in revenue. Docker Engine on Linux has no such requirement.
+
+### Cloudflare Tunnel (optional, recommended)
+
+With a tunnel you don't open any ports. The server connects out to Cloudflare. You need a Cloudflare account and a domain there.
+
+1. In Cloudflare Zero Trust, go to Networks → Tunnels, create a tunnel and copy its token.
+2. Add a public hostname, for example `*.company.com`, with service `http://caddy:80`.
+3. In `.env`, set `COMPOSE_PROFILES=tunnel`, `CLOUDFLARE_TUNNEL_TOKEN=<token>` and `INSTANCE_DOMAIN_HTTPS=cloudflare`.
+4. Run `docker compose up -d`, then open Settings → Domains in the panel and press "Check the domain".
 
 ### Operation
 
@@ -96,9 +105,18 @@ Kjør samme kommando på nytt for å oppdatere installasjonsfilene. `.env` og pa
 
 * 4 GB minne eller mer (mer jo flere instanser du kjører), 20 GB disk eller mer.
 * 64-bit x86 eller ARM.
-* Port 80 og 443 åpne hvis du bruker eget domene (for HTTPS). Er de opptatt, velger skriptet andre porter og sier fra.
+* Port 80 og 443 åpne hvis du bruker eget domene (for HTTPS). Er de opptatt, velger skriptet andre porter og sier fra. Eller bruk Cloudflare Tunnel (under) og la alle porter stå lukket.
 * **Windows og Mac** kjører containerne i en virtuell maskin, som er tregere og bruker mer minne. Bruk Linux til drift.
 * **Docker Desktop** er gratis for virksomheter med under 250 ansatte og under 10 millioner dollar i omsetning. Docker Engine på Linux har ikke det kravet.
+
+### Cloudflare Tunnel (valgfritt, anbefalt)
+
+Med en tunnel åpner du ingen porter. Serveren kobler seg ut til Cloudflare. Du trenger en Cloudflare-konto og et domene der.
+
+1. I Cloudflare Zero Trust går du til Networks → Tunnels, lager en tunnel og kopierer tokenet.
+2. Legg til et offentlig vertsnavn, for eksempel `*.firma.no`, med tjeneste `http://caddy:80`.
+3. I `.env` setter du `COMPOSE_PROFILES=tunnel`, `CLOUDFLARE_TUNNEL_TOKEN=<token>` og `INSTANCE_DOMAIN_HTTPS=cloudflare`.
+4. Kjør `docker compose up -d`, åpne Innstillinger → Domener i panelet og trykk «Sjekk domenet».
 
 ### Drift
 
