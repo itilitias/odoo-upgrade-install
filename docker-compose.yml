@@ -92,7 +92,7 @@ services:
       REPORT_COMPANY: ${REPORT_COMPANY:-}
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}
       DELIVERY_REPO_OWNER: ${DELIVERY_REPO_OWNER:-}
-      # Lisens: uten gyldig nøkkel er 1 kunde, 1 instans og 1 jobb gratis. Nøkkelen legges inn i panelet (System → Lisens).
+      # Lisens: uten gyldig nøkkel er 1 kunde, 1 instans, 1 staging og 1 jobb gratis. Nøkkelen legges inn i panelet (System → Lisens).
       # Oppdatering med ett trykk fra System-siden (bruker Docker-socketen og denne mappen)
       SELF_UPDATE: ${SELF_UPDATE:-1}
       LICENSE_ENFORCE: ${LICENSE_ENFORCE:-1}
