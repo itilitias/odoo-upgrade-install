@@ -59,7 +59,7 @@ if ($Purge) {
   Say ("  - " + (T "Dataene beholdes ($nVol volumer). Kjør med -Purge for å slette dem også." "The data is kept ($nVol volumes). Run with -Purge to delete it too."))
   if (-not $Yes) {
     $a = Read-Host "$(T 'Fortsette?' 'Continue?') [$(T 'J' 'Y')/n]"
-    if ($a -notmatch '^(j|y|ja|yes)$') { Die (T 'Avbrutt. Ingenting er endret.' 'Cancelled. Nothing was changed.') }
+    if ($a -notmatch '^(|j|y|ja|yes)$') { Die (T 'Avbrutt. Ingenting er endret.' 'Cancelled. Nothing was changed.') }
   }
 }
 
