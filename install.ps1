@@ -46,6 +46,23 @@ function Test-Admin {
   ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 }
 
+function Show-ContinueSteps($restartFirst) {
+  $n = 1
+  if ($restartFirst) {
+    Say (T "  $n. Start maskinen på nytt." "  $n. Restart the machine.")
+    $n++
+  }
+  Say (T "  $n. Start Docker Desktop fra Start-menyen. Godta vilkårene hvis det spør." "  $n. Start Docker Desktop from the Start menu. Accept the terms if it asks.")
+  Say (T '     Du trenger ingen konto hos Docker: velg å hoppe over innlogging.' '     You do not need a Docker account: choose to skip the sign-in.')
+  $n++
+  Say (T "  $n. Vent til Docker Desktop viser «Engine running» (grønn firkant nede til venstre)." "  $n. Wait until Docker Desktop shows `"Engine running`" (green square at the bottom left).")
+  Say (T '     Første gang kan det ta et par minutter. Ber Windows deg starte maskinen på nytt, gjør det først.' '     The first time it can take a couple of minutes. If Windows asks you to restart the machine, do that first.')
+  $n++
+  Say (T "  $n. Lukk dette PowerShell-vinduet, åpne et nytt, og kjør denne kommandoen på nytt (installasjonen fortsetter der den slapp):" "  $n. Close this PowerShell window, open a new one, and run this command again (the installation picks up where it stopped):")
+  Say ''
+  Say '     irm https://raw.githubusercontent.com/itilitias/odoo-upgrade-install/main/install.ps1 | iex'
+}
+
 # Docker Desktop kjører containerne i WSL2 (Windows' innebygde virtuelle Linux). Gir true hvis skriptet må stoppe her.
 function Ensure-Wsl {
   $has = $false
@@ -71,7 +88,9 @@ function Ensure-Wsl {
     if ($LASTEXITCODE -ne 0) { & wsl.exe --install | Out-Host }
   } finally { [Console]::OutputEncoding = $oldEnc }
   Say ''
-  Say (T 'WSL2 er slått på. Start maskinen på nytt, start Docker Desktop (Start-menyen), vent til det sier at Docker kjører, og kjør denne kommandoen en gang til.' 'WSL2 is turned on. Restart the machine, start Docker Desktop (Start menu), wait until it says Docker is running, and run this command once more.')
+  Say (T 'WSL2 er slått på, men installasjonen er IKKE ferdig ennå. Slik fortsetter du:' 'WSL2 is turned on, but the installation is NOT finished yet. To continue:')
+  Say ''
+  Show-ContinueSteps $true
   return $true
 }
 
@@ -87,9 +106,9 @@ if (-not $dockerCmd) {
   if ($winget -and (Confirm-Step (T 'Installere Docker Desktop nå med winget?' 'Install Docker Desktop now with winget?'))) {
     winget install -e --id Docker.DockerDesktop --accept-package-agreements --accept-source-agreements
     Say ''
-    Say (T 'Docker Desktop er installert. Start det (Start-menyen), vent til det sier at Docker kjører,' 'Docker Desktop is installed. Start it (Start menu), wait until it says Docker is running,')
-    Say (T 'start PowerShell på nytt (maskinen må kanskje startes om først) og kjør denne kommandoen en gang til.' 'start PowerShell again (the machine may need a restart first) and run this command once more.')
-    Say (T 'Du trenger ingen konto hos Docker: hopp over innlogging hvis Docker Desktop ber om det.' 'You do not need a Docker account: skip the sign-in if Docker Desktop asks for it.')
+    Say (T 'Docker Desktop er installert, men installasjonen er IKKE ferdig ennå. Slik fortsetter du:' 'Docker Desktop is installed, but the installation is NOT finished yet. To continue:')
+    Say ''
+    Show-ContinueSteps $false
     return
   }
   Die (T 'Installer Docker Desktop fra https://www.docker.com/products/docker-desktop/ , start det, og kjør denne kommandoen på nytt.' 'Install Docker Desktop from https://www.docker.com/products/docker-desktop/ , start it, and run this command again.')
