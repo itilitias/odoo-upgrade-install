@@ -42,6 +42,43 @@ if (-not [Environment]::Is64BitOperatingSystem) { Die (T 'Trenger 64-bit Windows
 
 # ---------------------------------------------------------------- Docker
 
+function Test-Admin {
+  ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+}
+
+# Docker Desktop kjører containerne i WSL2 (Windows' innebygde virtuelle Linux). Gir true hvis skriptet må stoppe her.
+function Ensure-Wsl {
+  $has = $false
+  if (Get-Command wsl.exe -ErrorAction SilentlyContinue) { & wsl.exe --status *> $null; $has = ($LASTEXITCODE -eq 0) }
+  if ($has) { return $false }
+  Say ''
+  Say (T 'WSL2 er ikke slått på på denne maskinen.' 'WSL2 is not turned on on this machine.')
+  Say (T 'Hva er det? Docker Desktop kjører containerne i en liten, innebygd Linux-maskin (WSL2). Windows må ha funksjonene «Windows Subsystem for Linux» og «Virtual Machine Platform» slått på for at det skal virke.' 'What is it? Docker Desktop runs the containers in a small built-in Linux machine (WSL2). Windows needs the features "Windows Subsystem for Linux" and "Virtual Machine Platform" turned on for it to work.')
+  Say (T 'Hva skjer? Kommandoen «wsl --install --no-distribution» slår på disse funksjonene. Den laster ned litt fra Microsoft, installerer ingen Linux-distribusjon, og rører ikke filene dine. Maskinen må startes på nytt etterpå.' 'What happens? The command "wsl --install --no-distribution" turns these features on. It downloads a little from Microsoft, installs no Linux distribution, and does not touch your files. The machine must be restarted afterwards.')
+  if (-not (Confirm-Step (T 'Slå på WSL2 nå?' 'Turn on WSL2 now?'))) {
+    Say (T 'Hoppet over. Du kan gjøre det selv senere: åpne PowerShell som administrator, kjør «wsl --install --no-distribution», og start maskinen på nytt.' 'Skipped. You can do it yourself later: open PowerShell as administrator, run "wsl --install --no-distribution", and restart the machine.')
+    return $false
+  }
+  if (-not (Test-Admin)) {
+    Say (T 'Dette krever administrator. Åpne PowerShell som administrator (høyreklikk på PowerShell i Start-menyen, «Kjør som administrator») og kjør denne kommandoen på nytt.' 'This needs administrator rights. Open PowerShell as administrator (right-click PowerShell in the Start menu, "Run as administrator") and run this command again.')
+    return $true
+  }
+  # wsl.exe skriver UTF-16; Out-Host holder utskriften utenfor returverdien til funksjonen
+  $oldEnc = [Console]::OutputEncoding
+  try {
+    [Console]::OutputEncoding = [System.Text.Encoding]::Unicode
+    & wsl.exe --install --no-distribution | Out-Host
+    if ($LASTEXITCODE -ne 0) { & wsl.exe --install | Out-Host }
+  } finally { [Console]::OutputEncoding = $oldEnc }
+  Say ''
+  Say (T 'WSL2 er slått på. Start maskinen på nytt, start Docker Desktop (Start-menyen), vent til det sier at Docker kjører, og kjør denne kommandoen en gang til.' 'WSL2 is turned on. Restart the machine, start Docker Desktop (Start menu), wait until it says Docker is running, and run this command once more.')
+  return $true
+}
+
+$dockerOk = $false
+if (Get-Command docker -ErrorAction SilentlyContinue) { & docker info *> $null; $dockerOk = ($LASTEXITCODE -eq 0) }
+if (-not $dockerOk) { if (Ensure-Wsl) { return } }
+
 $dockerCmd = Get-Command docker -ErrorAction SilentlyContinue
 if (-not $dockerCmd) {
   Say (T 'Docker Desktop er ikke installert.' 'Docker Desktop is not installed.')
@@ -52,13 +89,14 @@ if (-not $dockerCmd) {
     Say ''
     Say (T 'Docker Desktop er installert. Start det (Start-menyen), vent til det sier at Docker kjører,' 'Docker Desktop is installed. Start it (Start menu), wait until it says Docker is running,')
     Say (T 'start PowerShell på nytt (maskinen må kanskje startes om først) og kjør denne kommandoen en gang til.' 'start PowerShell again (the machine may need a restart first) and run this command once more.')
+    Say (T 'Du trenger ingen konto hos Docker: hopp over innlogging hvis Docker Desktop ber om det.' 'You do not need a Docker account: skip the sign-in if Docker Desktop asks for it.')
     return
   }
   Die (T 'Installer Docker Desktop fra https://www.docker.com/products/docker-desktop/ , start det, og kjør denne kommandoen på nytt.' 'Install Docker Desktop from https://www.docker.com/products/docker-desktop/ , start it, and run this command again.')
 }
 
 & docker info *> $null
-if ($LASTEXITCODE -ne 0) { Die (T 'Docker svarer ikke. Start Docker Desktop, vent til det kjører, og prøv igjen.' 'Docker is not responding. Start Docker Desktop, wait until it is running, and try again.') }
+if ($LASTEXITCODE -ne 0) { Die (T 'Docker svarer ikke. Start Docker Desktop (Start-menyen), vent til det sier at Docker kjører, og prøv igjen. Du trenger ingen konto hos Docker: hopp over innlogging. Sier Docker Desktop at WSL2 mangler, åpne PowerShell som administrator, kjør «wsl --install --no-distribution», og start maskinen på nytt.' 'Docker is not responding. Start Docker Desktop (Start menu), wait until it says Docker is running, and try again. You do not need a Docker account: skip the sign-in. If Docker Desktop says WSL2 is missing, open PowerShell as administrator, run "wsl --install --no-distribution", and restart the machine.') }
 & docker compose version *> $null
 if ($LASTEXITCODE -ne 0) { Die (T '«docker compose» mangler. Oppdater Docker Desktop.' '"docker compose" is missing. Update Docker Desktop.') }
 

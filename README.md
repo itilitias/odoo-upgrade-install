@@ -42,6 +42,12 @@ Run the same command again to update the installation files. `.env` and the pass
 * **Windows and Mac** run the containers in a virtual machine, which is slower and uses more memory. Use Linux for production.
 * **Docker Desktop** is free for companies with fewer than 250 employees and less than USD 10 million in revenue. Docker Engine on Linux has no such requirement.
 
+#### Windows: first-time notes
+
+* **Docker account:** not needed. Skip the sign-in if Docker Desktop asks for it. You only accept the license terms.
+* **WSL2:** Docker Desktop runs the containers in WSL2. If it is not turned on, the install script explains what it is and offers to run `wsl --install --no-distribution` for you (this needs PowerShell as administrator, and a restart afterwards). You can also run that command yourself.
+* If virtualization is off in the BIOS (VT-x or AMD-V), turn it on there. Newer machines usually have it on.
+
 ### Cloudflare Tunnel (optional, recommended)
 
 With a tunnel you don't open any ports. The server connects out to Cloudflare. You need a Cloudflare account and a domain there.
@@ -117,6 +123,12 @@ Kjør samme kommando på nytt for å oppdatere installasjonsfilene. `.env` og pa
 * Port 80 og 443 åpne hvis du bruker eget domene (for HTTPS). Er de opptatt, velger skriptet andre porter og sier fra. Eller bruk Cloudflare Tunnel (under) og la alle porter stå lukket.
 * **Windows og Mac** kjører containerne i en virtuell maskin, som er tregere og bruker mer minne. Bruk Linux til drift.
 * **Docker Desktop** er gratis for virksomheter med under 250 ansatte og under 10 millioner dollar i omsetning. Docker Engine på Linux har ikke det kravet.
+
+#### Windows: første gang
+
+* **Konto hos Docker:** trengs ikke. Hopp over innlogging hvis Docker Desktop ber om det. Du må bare godta lisensvilkårene.
+* **WSL2:** Docker Desktop kjører containerne i WSL2. Er det ikke slått på, forklarer installasjonsskriptet hva det er og tilbyr å kjøre `wsl --install --no-distribution` for deg (det krever PowerShell som administrator, og omstart etterpå). Du kan også kjøre kommandoen selv.
+* Er virtualisering slått av i BIOS (VT-x eller AMD-V), må du slå det på der. Nyere maskiner har det vanligvis på.
 
 ### Cloudflare Tunnel (valgfritt, anbefalt)
 
