@@ -51,6 +51,28 @@ ask() {  # ask "spørsmål": ja hvis OUP_YES=1 eller svaret er j/y. Uten termina
   case "$ans" in j|J|y|Y|ja|Ja|yes|Yes) return 0 ;; *) return 1 ;; esac
 }
 
+ask_yes() {  # som ask, men Enter betyr ja: ask_yes "spørsmål". Uten terminal og uten OUP_YES regnes det som nei.
+  [ "${OUP_YES:-0}" = "1" ] && return 0
+  has_tty || return 1
+  printf '%s [%s/n] ' "$1" "$(T J Y)" > /dev/tty
+  read -r ans < /dev/tty || ans=""
+  case "$ans" in n|N|nei|Nei|no|No) return 1 ;; *) return 0 ;; esac
+}
+
+release_license() {  # bruker panelets egen funksjon, så det virker uansett hvor nøkkelen er lagret
+  PANEL_ID="$(docker ps --filter 'label=com.docker.compose.project=odoo-upgrade' --filter 'label=com.docker.compose.service=panel' -q 2>/dev/null | head -1)"
+  if [ -z "$PANEL_ID" ]; then
+    say "  $(T "Panelet kjører ikke, så nøkkelen ble ikke frigjort. Bruk «Bruk nøkkelen her» i det nye panelet." "The panel is not running, so the key was not released. Use \"Use the key here\" in the new panel.")"
+    return 0
+  fi
+  OUT="$(docker exec "$PANEL_ID" python -c "from app import license as l; print(l.release() or 'OK')" 2>&1 | tail -1)" || OUT=""
+  case "$OUT" in
+    OK) say "  $(T "Lisensnøkkelen er frigjort." "The license key has been released.")" ;;
+    "Ingen nøkkel"*) say "  $(T "Det var ikke lagt inn noen lisensnøkkel." "No license key had been entered.")" ;;
+    *) say "  $(T "Kunne ikke frigjøre nøkkelen ($OUT). Bruk «Bruk nøkkelen her» i det nye panelet." "Could not release the key ($OUT). Use \"Use the key here\" in the new panel.")" ;;
+  esac
+}
+
 COMPOSE=""
 if [ -f "$DIR/docker-compose.yml" ]; then COMPOSE="docker compose --project-directory $DIR -p odoo-upgrade"; fi
 
@@ -92,7 +114,17 @@ if [ "$PURGE" = 1 ]; then
   [ "$CONFIRM" = "SLETT" ] || die "$(T "Ikke bekreftet. Ingenting er slettet." "Not confirmed. Nothing was deleted.")"
 else
   say "  - $(T "Dataene beholdes ($((N_PV + N_IV)) volumer). Kjør med --purge for å slette dem også." "The data is kept ($((N_PV + N_IV)) volumes). Run with --purge to delete it too.")"
-  ask "$(T "Fortsette?" "Continue?")" || die "$(T "Avbrutt. Ingenting er endret." "Cancelled. Nothing was changed.")"
+  ask_yes "$(T "Fortsette?" "Continue?")" || die "$(T "Avbrutt. Ingenting er endret." "Cancelled. Nothing was changed.")"
+fi
+
+# ---------------------------------------------------------------- lisensnøkkelen
+if [ -n "$PROJ_CONTS" ]; then
+  say ""
+  if ask_yes "$(T "Frigjøre lisensnøkkelen først? Da kan du aktivere den på en annen maskin (anbefalt)." "Release the license key first? Then you can activate it on another machine (recommended).")"; then
+    release_license
+  else
+    say "  $(T "Hoppet over. Er nøkkelen ikke frigjort, bruk «Bruk nøkkelen her» i det nye panelet." "Skipped. If the key is not released, use \"Use the key here\" in the new panel.")"
+  fi
 fi
 
 # ---------------------------------------------------------------- fjern

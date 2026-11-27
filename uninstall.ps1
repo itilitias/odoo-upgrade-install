@@ -63,6 +63,32 @@ if ($Purge) {
   }
 }
 
+# ---------------------------------------------------------------- lisensnøkkelen
+function Ask-Yes($q) {
+  if ($Yes) { return $true }
+  if (-not [Environment]::UserInteractive) { return $false }
+  $a = Read-Host "$q [$(T 'J' 'Y')/n]"
+  return -not ($a -match '^(n|no|nei)$')
+}
+function Release-License {
+  # Bruker panelets egen funksjon, så det virker uansett hvor nøkkelen er lagret
+  $panelId = & docker ps --filter 'label=com.docker.compose.project=odoo-upgrade' --filter 'label=com.docker.compose.service=panel' -q 2>$null | Select-Object -First 1
+  if (-not $panelId) {
+    Say ('  ' + (T 'Panelet kjører ikke, så nøkkelen ble ikke frigjort. Bruk «Bruk nøkkelen her» i det nye panelet.' 'The panel is not running, so the key was not released. Use "Use the key here" in the new panel.'))
+    return
+  }
+  $code = "from app import license as l; print(l.release() or 'OK')"
+  $out = (& docker exec $panelId python -c $code 2>&1 | Select-Object -Last 1)
+  if ($out -eq 'OK') { Say ('  ' + (T 'Lisensnøkkelen er frigjort.' 'The license key has been released.')) }
+  elseif ("$out" -like 'Ingen nøkkel*') { Say ('  ' + (T 'Det var ikke lagt inn noen lisensnøkkel.' 'No license key had been entered.')) }
+  else { Say ('  ' + (T "Kunne ikke frigjøre nøkkelen ($out). Bruk «Bruk nøkkelen her» i det nye panelet." "Could not release the key ($out). Use `"Use the key here`" in the new panel.")) }
+}
+if ($projConts) {
+  Say ''
+  if (Ask-Yes (T 'Frigjøre lisensnøkkelen først? Da kan du aktivere den på en annen maskin (anbefalt).' 'Release the license key first? Then you can activate it on another machine (recommended).')) { Release-License }
+  else { Say ('  ' + (T 'Hoppet over. Er nøkkelen ikke frigjort, bruk «Bruk nøkkelen her» i det nye panelet.' 'Skipped. If the key is not released, use "Use the key here" in the new panel.')) }
+}
+
 # ---------------------------------------------------------------- fjern
 # Docker skriver fremdrift til stderr; det skal ikke stoppe opprydningen
 $ErrorActionPreference = 'Continue'
