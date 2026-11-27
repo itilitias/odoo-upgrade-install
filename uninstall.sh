@@ -113,9 +113,10 @@ elif [ -n "$PROJ_CONTS" ]; then
   # shellcheck disable=SC2086
   docker rm -f $PROJ_CONTS >/dev/null 2>&1 || true
 fi
+docker rm -f oup-updater >/dev/null 2>&1 || true
 if [ -n "$IMAGES" ]; then
   # shellcheck disable=SC2086
-  docker rmi -f $IMAGES >/dev/null 2>&1 || true
+  docker rmi -f $IMAGES >/dev/null 2>&1 || docker rmi -f $IMAGES 2>&1 | sed 's/^/  /' || true
 fi
 if [ "$PURGE" = 1 ]; then
   say "$(T "Sletter data ..." "Deleting data ...")"
