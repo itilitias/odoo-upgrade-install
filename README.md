@@ -49,7 +49,7 @@ With a tunnel you don't open any ports. The server connects out to Cloudflare. Y
 1. In Cloudflare Zero Trust, go to Networks → Tunnels, create a tunnel and copy its token.
 2. Add a public hostname, for example `*.company.com`, with service `http://caddy:80`.
 3. In `.env`, set `COMPOSE_PROFILES=tunnel`, `CLOUDFLARE_TUNNEL_TOKEN=<token>` and `INSTANCE_DOMAIN_HTTPS=cloudflare`.
-4. Run `docker compose up -d`, then open Settings → Domains in the panel and press "Check the domain".
+4. The installer also asks for the tunnel token (or set `OUP_TUNNEL_TOKEN`) and fills in step 3 for you. If you add it later, run `docker compose up -d`. Then open Settings → Domains in the panel and press "Check the domain".
 
 ### Operation
 
@@ -116,7 +116,7 @@ Med en tunnel åpner du ingen porter. Serveren kobler seg ut til Cloudflare. Du 
 1. I Cloudflare Zero Trust går du til Networks → Tunnels, lager en tunnel og kopierer tokenet.
 2. Legg til et offentlig vertsnavn, for eksempel `*.firma.no`, med tjeneste `http://caddy:80`.
 3. I `.env` setter du `COMPOSE_PROFILES=tunnel`, `CLOUDFLARE_TUNNEL_TOKEN=<token>` og `INSTANCE_DOMAIN_HTTPS=cloudflare`.
-4. Kjør `docker compose up -d`, åpne Innstillinger → Domener i panelet og trykk «Sjekk domenet».
+4. Installasjonsskriptet spør også etter tunnel-tokenet (eller sett `OUP_TUNNEL_TOKEN`) og fyller inn steg 3 for deg. Legger du det til senere, kjør `docker compose up -d`. Åpne så Innstillinger → Domener i panelet og trykk «Sjekk domenet».
 
 ### Drift
 
