@@ -62,6 +62,15 @@ docker compose pull && docker compose up -d   # update
 
 Data lives in the Docker volumes `pgdata` and `oup-data`. Back up both. Set `OUP_DATA` in `.env` to a folder (for example `/srv/oup`) if you want the files in a regular folder.
 
+### Uninstall
+
+By default the uninstall script stops and removes the containers and images but **keeps all your data** (databases, backups, certificates). Add `--purge` to delete everything, including the folder with `.env`. Purge cannot be undone and asks you to type `SLETT` to confirm. Take a backup first.
+
+* Linux and Mac: `sudo sh uninstall.sh` (or `sudo sh uninstall.sh --purge`)
+* Windows (PowerShell): `.\uninstall.ps1` (or `.\uninstall.ps1 -Purge`)
+
+It only touches what belongs to the panel: the `odoo-upgrade` compose project and the instances the panel created. Other containers are left alone. Afterwards, remove the tunnel and DNS records in Cloudflare yourself if you used them, and cancel the license if it is paid. Docker itself is not removed.
+
 ### Other files
 
 * `docker-compose.yml`: the whole setup (panel, PostgreSQL, OpenUpgrade workers and Caddy for HTTPS).
@@ -128,6 +137,15 @@ docker compose pull && docker compose up -d   # oppdater
 ```
 
 Dataene ligger i Docker-volumene `pgdata` og `oup-data`. Ta backup av begge. Sett `OUP_DATA` i `.env` til en mappe (for eksempel `/srv/oup`) hvis du vil ha filene i en vanlig mappe.
+
+### Avinstaller
+
+Som standard stopper og fjerner avinstalleringsskriptet containerne og bildene, men **beholder alle dataene dine** (databaser, backuper, sertifikater). Legg til `--purge` for å slette alt, også mappen med `.env`. Purge kan ikke angres og ber deg skrive `SLETT` for å bekrefte. Ta backup først.
+
+* Linux og Mac: `sudo sh uninstall.sh` (eller `sudo sh uninstall.sh --purge`)
+* Windows (PowerShell): `.\uninstall.ps1` (eller `.\uninstall.ps1 -Purge`)
+
+Det rører bare det som hører til panelet: compose-prosjektet `odoo-upgrade` og instansene panelet har laget. Andre containere blir stående. Etterpå fjerner du selv tunnelen og DNS-postene i Cloudflare hvis du brukte dem, og sier opp lisensen hvis den er betalt. Docker selv fjernes ikke.
 
 ### Andre filer
 
